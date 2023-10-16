@@ -11,7 +11,8 @@
 		"build": "tsc",
 		"dev": "tsc --watch",
 		"exec": "npm run build && node dist/cli.js",
-		"test": "prettier --check . && xo && ava"
+		"test": "prettier --check . && xo && ava",
+		"prepare": "husky install"
 	},
 	"files": [
 		"dist"
@@ -23,6 +24,8 @@
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
+		"@commitlint/cli": "^17.8.0",
+		"@commitlint/config-conventional": "^17.8.0",
 		"@sindresorhus/tsconfig": "^3.0.1",
 		"@types/react": "^18.0.32",
 		"@typescript-eslint/eslint-plugin": "^6.7.5",
@@ -33,6 +36,7 @@
 		"eslint-plugin-react": "^7.32.2",
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"eslint-plugin-simple-import-sort": "^10.0.0",
+		"husky": "^8.0.0",
 		"ink-testing-library": "^3.0.0",
 		"prettier": "^2.8.7",
 		"ts-node": "^10.9.1",
