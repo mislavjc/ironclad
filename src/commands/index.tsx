@@ -107,7 +107,6 @@ export default function Index() {
 
     try {
       const functionCalls = await Promise.all(promises);
-      console.log(functionCalls);
 
       const functionCallsString = JSON.stringify(functionCalls, null, 2);
 
