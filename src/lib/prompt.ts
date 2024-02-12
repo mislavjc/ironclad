@@ -21,7 +21,7 @@ export const buildPrompt = (object: string) => {
               }
             <EXAMPLE RETURN>
                 {
-                  name: 'get_an_album',
+                  name: 'get-an-album',
                   description: 'Get Spotify catalog information for a single album.',
                   parameters: [
                     { name: 'album_id', type: 'string' },
