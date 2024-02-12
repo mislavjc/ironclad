@@ -1,17 +1,17 @@
 interface EnvVars {
-  VAR?: string;
-  API_KEY?: string;
+  OPENAPI_SCHEMA_URL: string | undefined;
+  OPENAI_API_KEY: string | undefined;
 }
 
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 
-export const readEnvVars = (): EnvVars => {
+export const readEnvVars = (): Partial<EnvVars> => {
   if (!existsSync('.env')) {
     return {};
   }
   const envContent = readFileSync('.env', 'utf-8');
   const lines = envContent.split('\n');
-  const envVars: EnvVars = {};
+  const envVars: Partial<EnvVars> = {};
   lines.forEach((line) => {
     const [key, value] = line.split('=');
     if (key) {
