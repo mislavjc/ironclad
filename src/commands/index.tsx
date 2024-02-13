@@ -5,8 +5,15 @@ import { writeFile } from 'fs/promises';
 import { Text } from 'ink';
 import yaml from 'js-yaml';
 import OpenAI from 'openai';
+import util from 'util';
 
+import { OpenAPIGenericSchema } from '../../types/openapi.js';
+import { generateRunFunction } from '../lib/ai.js';
 import { readEnvVars, updateEnvVars } from '../lib/env.js';
+import {
+  resolveComponentReferences,
+  stripResponsesFromSchema,
+} from '../lib/openapi.js';
 import { buildPrompt } from '../lib/prompt.js';
 
 const openai = new OpenAI({
@@ -52,7 +59,7 @@ export default function Index() {
 
     const command = `npx openapi-typescript ${newUrl} --o ./generated/api.ts`;
 
-    exec(command, (error, stdout, stderr) => {
+    exec(command, (error, _stdout, stderr) => {
       if (error) {
         console.error(`Error executing command: ${error.message}`);
         // Handle error here
@@ -64,27 +71,51 @@ export default function Index() {
         return;
       }
 
-      console.log(`stdout: ${stdout}`);
+      console.log(
+        "File generated/api.ts has been created with the OpenAPI schema's types."
+      );
 
       setStep(4);
     });
 
-    const doc = yaml.load(yamlContent);
+    const doc = stripResponsesFromSchema(
+      resolveComponentReferences(yaml.load(yamlContent) as OpenAPIGenericSchema)
+    );
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const paths = Object.keys(
-      (
-        doc as {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          paths: unknown;
+    const paths = Object.keys(doc.paths).slice(0, 10);
+
+    const operations = paths.flatMap((path) => {
+      const pathValue = doc.paths[path];
+
+      if (!pathValue) {
+        throw new Error(`No value found for path ${path}`);
+      }
+
+      const methods = Object.keys(pathValue);
+
+      return methods.map((method) => {
+        const operation = pathValue[method];
+
+        if (!operation) {
+          throw new Error(`No value found for method ${method}`);
         }
-      ).paths as object
-    ).slice(0, 10);
+
+        return {
+          path,
+          operationId: operation.operationId as string,
+          method,
+        };
+      });
+    });
 
     const promises = paths.map(async (path) => {
-      // @ts-expect-error no types
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const firstPropValue = doc.paths[path];
+
+      console.log(
+        'Generating function call for path:',
+        util.inspect(firstPropValue, false, null, true)
+      );
+
       const prompt = buildPrompt(JSON.stringify(firstPropValue));
 
       const completion = await openai.chat.completions.create({
@@ -118,9 +149,11 @@ export default function Index() {
         'File generated/functions.ts has been created with the function calls.'
       );
 
+      await generateRunFunction(operations);
+
       exec(
         'npx eslint ./generated/functions.ts --fix',
-        (error, stdout, stderr) => {
+        (error, _stdout, stderr) => {
           if (error) {
             console.error(`Error running ESLint: ${error.message}`);
             return;
@@ -131,7 +164,6 @@ export default function Index() {
           }
 
           console.log('ESLint has been run on generated/functions.ts');
-          console.log(stdout);
         }
       );
     } catch (error) {

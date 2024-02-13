@@ -10,7 +10,7 @@
 	"scripts": {
 		"build": "tsc",
 		"dev": "tsc --watch",
-		"exec": "npm run build && node dist/cli.js",
+		"exec": "npm run build && node dist/src/cli.js",
 		"test": "prettier --check . && xo && ava",
 		"prepare": "husky install"
 	},
