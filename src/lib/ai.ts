@@ -23,7 +23,7 @@ export const generateRunFunction = async (
     const client = createClient<paths>({ baseUrl: "https://myapi.dev/v1/" });
 
     export const runFunction = async <T extends keyof operations>(name: T, args: {
-      params: GetOperations[T]],
+      params: GetOperations[T],
     }) => {
       switch (name) {
     `;
