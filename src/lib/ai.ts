@@ -6,15 +6,24 @@ export const generateRunFunction = async (
 ) => {
   let runFunctionContent = `
     import createClient from "openapi-fetch";
-    import type { paths } from "./api.ts";
+    import type { paths, operations } from "./api.ts";
+
+    type ValidOperations = 'get' | 'post' | 'put' | 'patch' | 'delete';
+
+    type Operations<T extends ValidOperations> = {
+      [K in keyof operations]: T extends keyof operations[K]
+        ? {
+          [M in keyof operations]: operations[K][T];
+        }
+      : never;
+    };
+
+    type GetOperations = Operations<'get'>;
 
     const client = createClient<paths>({ baseUrl: "https://myapi.dev/v1/" });
 
-    export const runFunction = async (name: string, args: {
-      params: {
-        query: Record<string, string>;
-        path: Record<string, string>;
-      };
+    export const runFunction = async <T extends keyof operations>(name: T, args: {
+      params: GetOperations[T]],
     }) => {
       switch (name) {
     `;
