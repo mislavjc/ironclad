@@ -43,14 +43,16 @@ export const buildPrompt = (object: string) => {
                 name: 'get-an-album',
                 description: 'Get Spotify catalog information for a single album.',
                 parameters: [
-                  name: "path", type: "object", description: "Object with all path data", properties: { 
-                  id: { type: "string", description: "The Spotify ID of the album", example: "4aawyAB9vmqN3uQ7FjRGTy" }
-                  }},
-                  { name: "query", type: "object", description: "Object with all query data", properties: {
-                  market: { type: "string", description: "An ISO 3166-1 alpha-2 country code", example: "ES" }
-                  }},
-                  { name: "params", type: "object", description: "Object with all params data" },
-                  ],
+                  {
+                    name: "params",
+                    type: "object",
+                    description: "Object with all params data",
+                    properties: {
+                      path: { type: "object", description: "Object with all path data", properties: { id: { type: "string", description: "The Spotify ID of the album", example: "4aawyAB9vmqN3uQ7FjRGTy" } } },
+                      query: { type: "object", description: "Object with all query data", properties: { market: { type: "string", description: "An ISO 3166-1 alpha-2 country code", example: "ES" } } }
+                    }
+                  }
+                ],
               }
             </EXAMPLE RETURN>
 

@@ -11,9 +11,10 @@ export const generateRunFunction = async (
     const client = createClient<paths>({ baseUrl: "https://myapi.dev/v1/" });
 
     export const runFunction = async (name: string, args: {
-      params: Record<string, string>;
-      path: Record<string, string>;
-      query: Record<string, string>;
+      params: {
+        query: Record<string, string>;
+        path: Record<string, string>;
+      };
     }) => {
       switch (name) {
     `;
@@ -30,8 +31,6 @@ export const generateRunFunction = async (
       case '${operationId}':
         return await client?.${functionName}("${path}", {
           params: args.params,
-          path: args.path,
-          query: args.query,
         });
     `;
       return;
