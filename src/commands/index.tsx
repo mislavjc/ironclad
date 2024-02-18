@@ -6,6 +6,7 @@ import yaml from 'js-yaml';
 import { OpenAPIGenericSchema } from '../../types/openapi.js';
 import { generateRunFunction } from '../lib/ai.js';
 import { readEnvVars, updateEnvVars } from '../lib/env.js';
+import { lintFile } from '../lib/eslint.js';
 import {
   generateFunctionCalls,
   generateSchema,
@@ -74,7 +75,13 @@ export default function Index() {
 
     await generateRunFunction(operations);
 
-    setStep(8);
+    setStep(9);
+
+    await lintFile('./generated/api.ts');
+    await lintFile('./generated/functions.ts');
+    await lintFile('./generated/runFunction.ts');
+
+    setStep(10);
   };
 
   return (
@@ -124,6 +131,10 @@ export default function Index() {
       )}
       {step >= 8 && (
         <Alert variant="success">runFunction.ts generated successfully!</Alert>
+      )}
+      {step === 9 && <Spinner label="Linting generated files..." />}
+      {step >= 10 && (
+        <Alert variant="success">Generated files linted successfully!</Alert>
       )}
     </>
   );
