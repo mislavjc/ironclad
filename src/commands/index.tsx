@@ -18,8 +18,8 @@ import {
 export default function Index() {
   const [step, setStep] = useState(1);
   const [apiKey, setApiKey] = useState('');
-
   const [openApiUrl, setOpenApiUrl] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const envVars = readEnvVars();
@@ -30,7 +30,9 @@ export default function Index() {
 
     if (envVars.OPENAPI_SCHEMA_URL) {
       setOpenApiUrl(envVars.OPENAPI_SCHEMA_URL);
-      void handleOpenApiUrlSubmit(envVars.OPENAPI_SCHEMA_URL);
+      handleOpenApiUrlSubmit(envVars.OPENAPI_SCHEMA_URL).catch((err: Error) =>
+        setError(err.message)
+      );
       setStep(3);
     }
   }, []);
@@ -41,100 +43,119 @@ export default function Index() {
   };
 
   const handleOpenApiUrlSubmit = async (newUrl: string) => {
-    setOpenApiUrl(newUrl);
+    try {
+      setOpenApiUrl(newUrl);
 
-    updateEnvVars({
-      OPENAI_API_KEY: readEnvVars().OPENAI_API_KEY || apiKey,
-      OPENAPI_SCHEMA_URL: newUrl,
-    });
+      updateEnvVars({
+        OPENAI_API_KEY: readEnvVars().OPENAI_API_KEY || apiKey,
+        OPENAPI_SCHEMA_URL: newUrl,
+      });
 
-    setStep(3);
+      setStep(3);
 
-    const yamlContent = await fetch(newUrl).then((res) => res.text());
+      const yamlContent = await fetch(newUrl).then((res) => res.text());
 
-    generateSchema(newUrl);
+      generateSchema(newUrl);
 
-    setStep(4);
+      setStep(4);
 
-    const doc = stripResponsesFromSchema(
-      resolveComponentReferences(yaml.load(yamlContent) as OpenAPIGenericSchema)
-    );
+      const doc = stripResponsesFromSchema(
+        resolveComponentReferences(
+          yaml.load(yamlContent) as OpenAPIGenericSchema
+        )
+      );
 
-    setStep(5);
+      setStep(5);
 
-    const paths = Object.keys(doc.paths).slice(0, 10);
+      const paths = Object.keys(doc.paths).slice(0, 10);
 
-    const operations = getOperations({ paths, doc });
+      const operations = getOperations({ paths, doc });
 
-    await generateFunctionCalls({
-      paths,
-      doc,
-    });
+      await generateFunctionCalls({
+        paths,
+        doc,
+      });
 
-    setStep(7);
+      setStep(7);
 
-    await generateRunFunction(operations);
+      await generateRunFunction(operations);
 
-    setStep(9);
+      setStep(9);
 
-    await lintFile('./generated/api.ts');
-    await lintFile('./generated/functions.ts');
-    await lintFile('./generated/runFunction.ts');
+      await lintFile('./generated/api.ts');
+      await lintFile('./generated/functions.ts');
+      await lintFile('./generated/runFunction.ts');
 
-    setStep(10);
+      setStep(10);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
   };
 
   return (
     <>
-      {step === 1 && (
+      {error && <Alert variant="error">{error}</Alert>}
+      {!error && (
         <>
-          <Text>No OpenAI API key found.</Text>
-          <TextInput
-            placeholder="Enter your OpenAI API key..."
-            onSubmit={handleApiKeySubmit}
-          />
+          {step === 1 && (
+            <>
+              <Text>No OpenAI API key found.</Text>
+              <TextInput
+                placeholder="Enter your OpenAI API key..."
+                onSubmit={handleApiKeySubmit}
+              />
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <Text>Using API key found in .env</Text>
+              <TextInput
+                placeholder="Enter your OpenAPI schema URL..."
+                onSubmit={(url) =>
+                  void handleOpenApiUrlSubmit(url).catch((err: Error) =>
+                    setError(err.message)
+                  )
+                }
+              />
+            </>
+          )}
+          {step === 3 && (
+            <>
+              <Spinner label={`Loading ${openApiUrl}`} />
+            </>
+          )}
+          {step >= 4 && (
+            <Alert variant="success">
+              Types for OpenAPI schema generated successfully!
+            </Alert>
+          )}
+          {step === 5 && (
+            <>
+              <Spinner label="Generating function calls for OpenAPI schema..." />
+            </>
+          )}
+          {step >= 6 && (
+            <Alert variant="success">
+              Function calls for OpenAPI schema generated successfully!
+            </Alert>
+          )}
+          {step === 7 && (
+            <>
+              <Spinner label="Generating runFunction.ts..." />
+            </>
+          )}
+          {step >= 8 && (
+            <Alert variant="success">
+              runFunction.ts generated successfully!
+            </Alert>
+          )}
+          {step === 9 && <Spinner label="Linting generated files..." />}
+          {step >= 10 && (
+            <Alert variant="success">
+              Generated files linted successfully!
+            </Alert>
+          )}
         </>
-      )}
-      {step === 2 && (
-        <>
-          <Text>Using API key found in .env</Text>
-          <TextInput
-            placeholder="Enter your OpenAPI schema URL..."
-            onSubmit={void handleOpenApiUrlSubmit}
-          />
-        </>
-      )}
-      {step === 3 && (
-        <>
-          <Spinner label={`Loading ${openApiUrl}`} />
-        </>
-      )}
-      {step >= 4 && (
-        <Alert variant="success">
-          Types for OpenAPI schema generated successfully!
-        </Alert>
-      )}
-      {step === 5 && (
-        <>
-          <Spinner label="Generating function calls for OpenAPI schema..." />
-        </>
-      )}
-      {step >= 6 && (
-        <Alert variant="success">
-          Function calls for OpenAPI schema generated successfully!
-        </Alert>
-      )}
-      {step === 7 && (
-        <>
-          <Spinner label="Generating runFunction.ts..." />
-        </>
-      )}
-      {step >= 8 && (
-        <Alert variant="success">runFunction.ts generated successfully!</Alert>
-      )}
-      {step === 9 && <Spinner label="Linting generated files..." />}
-      {step >= 10 && (
-        <Alert variant="success">Generated files linted successfully!</Alert>
       )}
     </>
   );
