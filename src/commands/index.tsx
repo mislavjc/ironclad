@@ -5,7 +5,6 @@ import { writeFile } from 'fs/promises';
 import { Text } from 'ink';
 import yaml from 'js-yaml';
 import OpenAI from 'openai';
-import util from 'util';
 
 import { OpenAPIGenericSchema } from '../../types/openapi.js';
 import { generateRunFunction } from '../lib/ai.js';
@@ -110,11 +109,6 @@ export default function Index() {
 
     const promises = paths.map(async (path) => {
       const firstPropValue = doc.paths[path];
-
-      console.log(
-        'Generating function call for path:',
-        util.inspect(firstPropValue, false, null, true)
-      );
 
       const prompt = buildPrompt(JSON.stringify(firstPropValue));
 
