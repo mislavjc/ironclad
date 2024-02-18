@@ -10,7 +10,6 @@ import OpenAI from 'openai';
 
 import { OpenAPIGenericSchema } from '../../types/openapi.js';
 
-import { generateRunFunction } from './ai.js';
 import { readEnvVars } from './env.js';
 import { buildPrompt } from './prompt.js';
 
@@ -100,19 +99,11 @@ export const generateSchema = (url: string) => {
 
   exec(command, (error, _stdout, stderr) => {
     if (error) {
-      console.error(`Error executing command: ${error.message}`);
-      // Handle error here
-      return;
+      throw new Error('Error executing command', error);
     }
     if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      // Handle stderr here
-      return;
+      throw new Error(`Error: ${stderr}`);
     }
-
-    console.log(
-      "File generated/api.ts has been created with the OpenAPI schema's types."
-    );
   });
 };
 
@@ -149,19 +140,7 @@ export const getOperations = ({ paths, doc }: OperationProps) => {
   return operations;
 };
 
-type GenerateFunctionCallsProps = OperationProps & {
-  operations: Array<{
-    path: string;
-    operationId: string;
-    method: string;
-  }>;
-};
-
-export const generateFunctionCalls = async ({
-  paths,
-  doc,
-  operations,
-}: GenerateFunctionCallsProps) => {
+export const generateFunctionCalls = async ({ paths, doc }: OperationProps) => {
   const promises = paths.map(async (path) => {
     const firstPropValue = doc.paths[path];
 
@@ -193,29 +172,7 @@ export const generateFunctionCalls = async ({
     const content = `export const functions = ${functionCallsString};`;
 
     await writeFile('./generated/functions.ts', content, 'utf8');
-
-    console.log(
-      'File generated/functions.ts has been created with the function calls.'
-    );
-
-    await generateRunFunction(operations);
-
-    exec(
-      'npx eslint ./generated/functions.ts --fix',
-      (error, _stdout, stderr) => {
-        if (error) {
-          console.error(`Error running ESLint: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`ESLint stderr: ${stderr}`);
-          return;
-        }
-
-        console.log('ESLint has been run on generated/functions.ts');
-      }
-    );
   } catch (error) {
-    console.error('An error occurred:', error);
+    throw new Error('An error occurred:', error as Error);
   }
 };

@@ -1,4 +1,3 @@
-import { exec } from 'child_process';
 import { writeFile } from 'fs/promises';
 
 export const generateRunFunction = async (
@@ -64,22 +63,4 @@ export const generateRunFunction = async (
   `;
 
   await writeFile('./generated/runFunction.ts', runFunctionContent, 'utf8');
-
-  console.log('File generated/runFunction.ts has been created.');
-
-  exec(
-    'npx eslint ./generated/runFunction.ts --fix',
-    (error, _stdout, stderr) => {
-      if (error) {
-        console.error(`Error running ESLint: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.error(`ESLint stderr: ${stderr}`);
-        return;
-      }
-
-      console.log('ESLint has been run on generated/runFunction.ts');
-    }
-  );
 };

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Spinner, TextInput } from '@inkjs/ui';
+import { Alert, Spinner, TextInput } from '@inkjs/ui';
 import { Text } from 'ink';
 import yaml from 'js-yaml';
 
 import { OpenAPIGenericSchema } from '../../types/openapi.js';
+import { generateRunFunction } from '../lib/ai.js';
 import { readEnvVars, updateEnvVars } from '../lib/env.js';
 import {
   generateFunctionCalls,
@@ -58,6 +59,8 @@ export default function Index() {
       resolveComponentReferences(yaml.load(yamlContent) as OpenAPIGenericSchema)
     );
 
+    setStep(5);
+
     const paths = Object.keys(doc.paths).slice(0, 10);
 
     const operations = getOperations({ paths, doc });
@@ -65,8 +68,13 @@ export default function Index() {
     await generateFunctionCalls({
       paths,
       doc,
-      operations,
     });
+
+    setStep(7);
+
+    await generateRunFunction(operations);
+
+    setStep(8);
   };
 
   return (
@@ -89,7 +97,34 @@ export default function Index() {
           />
         </>
       )}
-      {step === 3 && <Spinner label={`Loading ${openApiUrl}`} />}
+      {step === 3 && (
+        <>
+          <Spinner label={`Loading ${openApiUrl}`} />
+        </>
+      )}
+      {step >= 4 && (
+        <Alert variant="success">
+          Types for OpenAPI schema generated successfully!
+        </Alert>
+      )}
+      {step === 5 && (
+        <>
+          <Spinner label="Generating function calls for OpenAPI schema..." />
+        </>
+      )}
+      {step >= 6 && (
+        <Alert variant="success">
+          Function calls for OpenAPI schema generated successfully!
+        </Alert>
+      )}
+      {step === 7 && (
+        <>
+          <Spinner label="Generating runFunction.ts..." />
+        </>
+      )}
+      {step >= 8 && (
+        <Alert variant="success">runFunction.ts generated successfully!</Alert>
+      )}
     </>
   );
 }
