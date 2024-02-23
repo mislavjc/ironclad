@@ -17,10 +17,7 @@ export const generateRunFunction = async (
       ? operations[Path][Property]
       : never;
 
-    export const runFunction = async <T extends keyof operations>(name: T, args: {
-      body: unknown,
-      params: unknown,
-    }) => {
+    export const runFunction = async (name: string, args: Record<string, unknown>) => {
       switch (name) {
     `;
 
