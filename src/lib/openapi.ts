@@ -193,6 +193,6 @@ export const generateFunctionCalls = async ({ paths, doc }: OperationProps) => {
 
     await writeFile('./generated/functions.ts', content, 'utf8');
   } catch (error) {
-    throw new Error('An error occurred:', error as Error);
+    throw new Error(`An error occurred: ${error as string}`);
   }
 };
