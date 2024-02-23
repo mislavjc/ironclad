@@ -138,7 +138,8 @@ export const getOperations = ({ paths, doc }: OperationProps) => {
 
       return {
         path,
-        operationId: operation.operationId as string,
+        operationId:
+          operation.operationId || path.replace(/\//g, '_') + '_' + method,
         method,
       };
     });
