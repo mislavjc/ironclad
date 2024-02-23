@@ -149,32 +149,45 @@ export const getOperations = ({ paths, doc }: OperationProps) => {
 
 export const generateFunctionCalls = async ({ paths, doc }: OperationProps) => {
   const promises = paths.map(async (path) => {
-    const firstPropValue = doc.paths[path];
+    const endpoints = doc.paths[path];
 
-    const prompt = buildPrompt(JSON.stringify(firstPropValue));
+    if (!endpoints) {
+      throw new Error(`No value found for path ${path}`);
+    }
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a friendly AI assistant that only returns JSON',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    const completions = await Promise.all(
+      Object.keys(endpoints).map(async (key) => {
+        const endpoint = endpoints[key];
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return JSON.parse(completion.choices[0]?.message.content || '');
+        const prompt = buildPrompt(JSON.stringify(endpoint));
+
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a friendly AI assistant that only returns JSON',
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+        });
+
+        return JSON.parse(completion.choices[0]?.message.content || '');
+      })
+    );
+
+    return completions;
   });
 
   try {
     const functionCalls = await Promise.all(promises);
 
-    const functionCallsString = JSON.stringify(functionCalls, null, 2);
+    const flattenedFunctionCalls = functionCalls.flat();
+
+    const functionCallsString = JSON.stringify(flattenedFunctionCalls, null, 2);
 
     const content = `export const functions = ${functionCallsString};`;
 
