@@ -1,7 +1,8 @@
 import { writeFile } from 'fs/promises';
 
 export const generateRunFunction = async (
-  operations: Array<{ path: string; operationId: string; method: string }>
+  operations: Array<{ path: string; operationId: string; method: string }>,
+  serverUrl: string
 ) => {
   let runFunctionContent = `
     import createClient from "openapi-fetch";
@@ -19,7 +20,7 @@ export const generateRunFunction = async (
 
     type GetOperations = Operations<'get'>;
 
-    const client = createClient<paths>({ baseUrl: "https://myapi.dev/v1/" });
+    const client = createClient<paths>({ baseUrl: "${serverUrl}" });
 
     export const runFunction = async <T extends keyof operations>(name: T, args: {
       params: GetOperations[T],

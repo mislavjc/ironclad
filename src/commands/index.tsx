@@ -11,6 +11,7 @@ import {
   generateFunctionCalls,
   generateSchema,
   getOperations,
+  getServerUrl,
   resolveComponentReferences,
   stripResponsesFromSchema,
 } from '../lib/openapi.js';
@@ -53,16 +54,16 @@ export default function Index() {
 
       setStep(3);
 
-      const yamlContent = await fetch(newUrl).then((res) => res.text());
-
       await generateSchema(newUrl);
 
       setStep(4);
 
+      const yamlContent = yaml.load(
+        await fetch(newUrl).then((res) => res.text())
+      ) as OpenAPIGenericSchema;
+
       const doc = stripResponsesFromSchema(
-        resolveComponentReferences(
-          yaml.load(yamlContent) as OpenAPIGenericSchema
-        )
+        resolveComponentReferences(yamlContent)
       );
 
       setStep(5);
@@ -78,7 +79,9 @@ export default function Index() {
 
       setStep(7);
 
-      await generateRunFunction(operations);
+      const serverUrl = getServerUrl(yamlContent);
+
+      await generateRunFunction(operations, serverUrl);
 
       setStep(9);
 

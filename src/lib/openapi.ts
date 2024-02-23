@@ -95,6 +95,10 @@ export const getYamlContent = async (url: string) => {
   return yamlContent;
 };
 
+export const getServerUrl = (schema: OpenAPIGenericSchema) => {
+  return schema.servers?.[0]?.url || '';
+};
+
 export const generateSchema = async (url: string) => {
   await createDirectoryIfNotExists('./generated');
 
