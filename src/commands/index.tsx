@@ -55,7 +55,7 @@ export default function Index() {
 
       const yamlContent = await fetch(newUrl).then((res) => res.text());
 
-      generateSchema(newUrl);
+      await generateSchema(newUrl);
 
       setStep(4);
 

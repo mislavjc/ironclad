@@ -12,6 +12,7 @@ import { OpenAPIGenericSchema } from '../../types/openapi.js';
 
 import { readEnvVars } from './env.js';
 import { buildPrompt } from './prompt.js';
+import { createDirectoryIfNotExists } from './utils.js';
 
 const openai = new OpenAI({
   apiKey: readEnvVars().OPENAI_API_KEY,
@@ -94,7 +95,9 @@ export const getYamlContent = async (url: string) => {
   return yamlContent;
 };
 
-export const generateSchema = (url: string) => {
+export const generateSchema = async (url: string) => {
+  await createDirectoryIfNotExists('./generated');
+
   const command = `npx openapi-typescript ${url} --o ./generated/api.ts`;
 
   exec(command, (error, _stdout, stderr) => {
