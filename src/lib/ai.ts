@@ -32,8 +32,8 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as GetProperty<'${operationId}', 'parameters'>,
-        });
+          params: args["params"] as GetProperty<'${operationId}', 'parameters'>,
+        }).then((res) => res?.data || res.error);
     `;
       return;
     }
@@ -42,9 +42,9 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as GetProperty<'${operationId}', 'parameters'>,
-          body: args.body as GetProperty<'${operationId}', 'requestBody'>,
-        });
+          params: args["params"] as GetProperty<'${operationId}', 'parameters'>,
+          body: args["body"] as GetProperty<'${operationId}', 'requestBody'>,
+        }).then((res) => res?.data || res.error);
     `;
       return;
     }
@@ -53,9 +53,9 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as GetProperty<'${operationId}', 'parameters'>,
-          body: args.body as GetProperty<'${operationId}', 'requestBody'>,
-        });
+          params: args["params"] as GetProperty<'${operationId}', 'parameters'>,
+          body: args["body"] as GetProperty<'${operationId}', 'requestBody'>,
+        }).then((res) => res?.data || res.error);
     `;
       return;
     }
@@ -64,9 +64,9 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as GetProperty<'${operationId}', 'parameters'>,
-          body: args.body as GetProperty<'${operationId}', 'requestBody'>,
-        });
+          params: args["params"] as GetProperty<'${operationId}', 'parameters'>,
+          body: args["body"] as GetProperty<'${operationId}', 'requestBody'>,
+        }).then((res) => res?.data || res.error);
     `;
       return;
     }
@@ -75,9 +75,9 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as GetProperty<'${operationId}', 'parameters'>,
-          body: args.body as GetProperty<'${operationId}', 'requestBody'>
-        });
+          params: args["params"] as GetProperty<'${operationId}', 'parameters'>,
+          body: args["body"] as GetProperty<'${operationId}', 'requestBody'>
+        });.then((res) => res?.data || res.error);
     `;
       return;
     }
