@@ -77,7 +77,7 @@ export const generateRunFunction = async (
         return await client?.${functionName}("${path}", {
           params: args["params"] as GetProperty<'${operationId}', 'parameters'>,
           body: args["body"] as GetProperty<'${operationId}', 'requestBody'>
-        });.then((res) => res?.data || res.error);
+        }).then((res) => res?.data || res.error);
     `;
       return;
     }
