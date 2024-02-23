@@ -10,8 +10,15 @@ export const generateRunFunction = async (
 
     const client = createClient<paths>({ baseUrl: "${serverUrl}" });
 
+    type GetProperty<
+      Path extends keyof operations,
+      Property extends string
+    > = Property extends keyof operations[Path]
+      ? operations[Path][Property]
+      : never;
+
     export const runFunction = async <T extends keyof operations>(name: T, args: {
-      data: unknown,
+      body: unknown,
       params: unknown,
     }) => {
       switch (name) {
@@ -28,7 +35,7 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as operations['${operationId}']['parameters'],
+          params: args.params as GetProperty<'${operationId}', 'parameters'>,
         });
     `;
       return;
@@ -38,8 +45,8 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as operations['${operationId}']['parameters'],
-          body: args.data as operations['${operationId}']['requestBody'],
+          params: args.params as GetProperty<'${operationId}', 'parameters'>,
+          body: args.body as GetProperty<'${operationId}', 'requestBody'>,
         });
     `;
       return;
@@ -49,8 +56,8 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as operations['${operationId}']['parameters'],
-          body: args.data as operations['${operationId}']['requestBody'],
+          params: args.params as GetProperty<'${operationId}', 'parameters'>,
+          body: args.body as GetProperty<'${operationId}', 'requestBody'>,
         });
     `;
       return;
@@ -60,8 +67,8 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as operations['${operationId}']['parameters'],
-          body: args.data as operations['${operationId}']['requestBody'],
+          params: args.params as GetProperty<'${operationId}', 'parameters'>,
+          body: args.body as GetProperty<'${operationId}', 'requestBody'>,
         });
     `;
       return;
@@ -71,8 +78,8 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params as operations['${operationId}']['parameters'],
-          body: args.data as operations['${operationId}']['requestBody'],
+          params: args.params as GetProperty<'${operationId}', 'parameters'>,
+          body: args.body as GetProperty<'${operationId}', 'requestBody'>
         });
     `;
       return;
