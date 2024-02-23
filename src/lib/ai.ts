@@ -8,22 +8,11 @@ export const generateRunFunction = async (
     import createClient from "openapi-fetch";
     import type { paths, operations } from "./api.ts";
 
-    type ValidOperations = 'get' | 'post' | 'put' | 'patch' | 'delete';
-
-    type Operations<T extends ValidOperations> = {
-      [K in keyof operations]: T extends keyof operations[K]
-        ? {
-          [M in keyof operations]: operations[K][T];
-        }
-      : never;
-    };
-
-    type GetOperations = Operations<'get'>;
-
     const client = createClient<paths>({ baseUrl: "${serverUrl}" });
 
     export const runFunction = async <T extends keyof operations>(name: T, args: {
-      params: GetOperations[T],
+      data: unknown,
+      params: unknown,
     }) => {
       switch (name) {
     `;
@@ -39,7 +28,7 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          params: args.params,
+          params: args.params as operations['${operationId}']['parameters'],
         });
     `;
       return;
@@ -49,7 +38,41 @@ export const generateRunFunction = async (
       runFunctionContent += `
       case '${operationId}':
         return await client?.${functionName}("${path}", {
-          data: args,
+          params: args.params as operations['${operationId}']['parameters'],
+          body: args.data as operations['${operationId}']['requestBody'],
+        });
+    `;
+      return;
+    }
+
+    if (functionName === 'PUT') {
+      runFunctionContent += `
+      case '${operationId}':
+        return await client?.${functionName}("${path}", {
+          params: args.params as operations['${operationId}']['parameters'],
+          body: args.data as operations['${operationId}']['requestBody'],
+        });
+    `;
+      return;
+    }
+
+    if (functionName === 'PATCH') {
+      runFunctionContent += `
+      case '${operationId}':
+        return await client?.${functionName}("${path}", {
+          params: args.params as operations['${operationId}']['parameters'],
+          body: args.data as operations['${operationId}']['requestBody'],
+        });
+    `;
+      return;
+    }
+
+    if (functionName === 'DELETE') {
+      runFunctionContent += `
+      case '${operationId}':
+        return await client?.${functionName}("${path}", {
+          params: args.params as operations['${operationId}']['parameters'],
+          body: args.data as operations['${operationId}']['requestBody'],
         });
     `;
       return;
