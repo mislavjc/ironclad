@@ -1,6 +1,6 @@
 import createClient from 'openapi-fetch';
 
-import type { operations, paths } from './api.js';
+import type { operations, paths } from './types.ts';
 
 const client = createClient<paths>({ baseUrl: 'https://api.spotify.com/v1' });
 

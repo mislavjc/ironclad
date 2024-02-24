@@ -85,7 +85,7 @@ export default function Index() {
 
       setStep(9);
 
-      await lintFile('./generated/api.ts');
+      await lintFile('./generated/types.ts');
       await lintFile('./generated/functions.ts');
       await lintFile('./generated/runFunction.ts');
 

@@ -102,7 +102,7 @@ export const getServerUrl = (schema: OpenAPIGenericSchema) => {
 export const generateSchema = async (url: string) => {
   await createDirectoryIfNotExists('./generated');
 
-  const command = `npx openapi-typescript ${url} --o ./generated/api.ts`;
+  const command = `npx openapi-typescript ${url} --o ./generated/types.ts`;
 
   exec(command, (error, _stdout, stderr) => {
     if (error) {

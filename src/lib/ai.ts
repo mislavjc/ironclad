@@ -6,7 +6,7 @@ export const generateRunFunction = async (
 ) => {
   let runFunctionContent = `
     import createClient from "openapi-fetch";
-    import type { paths, operations } from "./api.ts";
+    import type { paths, operations } from "./types.ts";
 
     const client = createClient<paths>({ baseUrl: "${serverUrl}" });
 
