@@ -14,10 +14,6 @@ import { readEnvVars } from './env.js';
 import { buildPrompt } from './prompt.js';
 import { createDirectoryIfNotExists } from './utils.js';
 
-const openai = new OpenAI({
-  apiKey: readEnvVars().OPENAI_API_KEY,
-});
-
 export const resolveComponentReferences = (
   schema: OpenAPIGenericSchema
 ): OpenAPIGenericSchema => {
@@ -149,6 +145,10 @@ export const getOperations = ({ paths, doc }: OperationProps) => {
 };
 
 export const generateFunctionCalls = async ({ paths, doc }: OperationProps) => {
+  const openai = new OpenAI({
+    apiKey: readEnvVars().OPENAI_API_KEY || '',
+  });
+
   const promises = paths.map(async (path) => {
     const endpoints = doc.paths[path];
 
